@@ -7,9 +7,13 @@ const rightProductImage = document.getElementById('right-product-img');
 const leftProductHeaderTag = document.getElementById('left-product-h2');
 const centerProductHeaderTag = document.getElementById('center-product-h2');
 const rightProductHeaderTag = document.getElementById('right-product-h2');
+const productNames = ['Bag', 'Banana', 'Bathroom', 'Boots', 'Breakfast', 'Bubblegum', 'Chair', 'Cthulhu', 'Dog-duck', 'Dragon', 'Pen', 'Pet-sweep', 'Scissors', 'Shark', 'Sweep', 'Tauntaun', 'Unicorn', 'USB', 'Water-can', 'Wine-glass'];
 
-const maxClicks = 25;
+const maxClicks = 5;
 let totalClicks = 0;
+
+const maxRounds = 5;
+let roundCtr = 1;
 
 let leftProductOnThePage = null;
 let centerProductOnThePage = null;
@@ -20,32 +24,13 @@ function Product (title, url) {
     this.clicks = 0;
     this.timesShown = 0;
     this.url = url;
+    this.tally = 0;
+    this.views = 0;
 
     Product.all.push(this);
 };
 
 Product.all = [];
-
-new Product('Bag', './images/bag.jpg');
-new Product('Banana', './images/banana.jpg');
-new Product('Bathroom', './images/bathroom.jpg');
-new Product('Boots', './images/boots.jpg');
-new Product('Breakfast', './images/breakfast.jpg');
-new Product('Bubblegum', './images/bubblegum.jpg');
-new Product('Chair', './images/chair.jpg');
-new Product('Cthulhu', './images/cthulhu.jpg');
-new Product('Dog-duck', './images/dog-duck.jpg');
-new Product('Dragon', './images/dragon.jpg');
-new Product('Pen', './images/pen.jpg');
-new Product('Pet-sweep', './images/pet-sweep.jpg');
-new Product('Scissors', './images/scissors.jpg');
-new Product('Shark', './images/shark.jpg');
-new Product('Sweep', './images/sweep.png');
-new Product('Tauntaun', './images/tauntaun.jpg');
-new Product('Unicorn', './images/unicorn.jpg');
-new Product('USB', './images/usb.gif');
-new Product('Water-can', './images/water-can.jpg');
-new Product('Wine-glass', './images/wine-glass.jpg');
 
 function shuffle(array) {
     for (let i = array.length -1; i >= 0; i--) {
@@ -56,9 +41,26 @@ function shuffle(array) {
     }
 }
 
+function createProducts() {
+    for (let index = 0; index < productNames.length; index++) {
+        const productName = productNames [index];
+        new Product(productName, './images/' + productName + '.jpg');
+    }
+}
+
 function pickNewProduct() {
     shuffle(Product.all);
-    console.log(Product.all);
+    const safeProducts = [];
+    for (let index = 0; index < Product.all.length; index++) {
+        const product = Product.all[index];
+        if (product !== leftProductOnThePage && product !== rightProductOnThePage) {
+            safeProducts.push(product);
+            if (safeProducts.length === 3) {
+                break;
+            }
+        }
+    }
+
     leftProductOnThePage = Product.all[0];
     centerProductOnThePage = Product.all[1];
     rightProductOnThePage = Product.all[2];
@@ -102,17 +104,18 @@ function handleClickProduct(event) {
 
         pickNewProduct();
     }
+    totalClicks += 1;
+
+    if (totalClicks === maxClicks) {
+        productImageSectionTag.removeEventListener('click', handleClickProduct);
+    
+        alert('That will do');
+    
+        renderLikes();
+    }
+    
 }
 
-totalClicks += 1;
-
-if (totalClicks === maxClicks) {
-    productImageSectionTag.removeEventListener('click', handleClickProduct);
-
-    alert('That will do');
-
-    renderLikes();
-}
 
 function renderLikes() {
     const likesListElem = document.getElementById('product-clicks');
@@ -127,6 +130,56 @@ function renderLikes() {
 
 productImageSectionTag.addEventListener('click', handleClickProduct);
 
-pickNewProduct();
+function productClickHandler(event) {
+    const productId = event.target.id;
 
-renderLikes();
+    switch (productId) {
+        case leftProductImage.id:
+            leftProductOnThePage.tally += 1;
+            pickNewProduct();
+            renderNewProduct();
+            roundCtr += 1;
+            break;
+
+        case centerProductImage.id:
+            centerProductOnThePage.tally += 1;
+            pickNewProduct();
+            renderNewProduct();
+            roundCtr += 1;
+
+        case rightProductImage.id:
+            rightProductOnThePage.tally += 1;
+            pickNewProduct();
+            renderNewProduct();
+            roundCtr += 1;
+
+        default:
+            alert('Mind the gap!');
+    }
+
+    if (roundCtr === maxRounds) {
+        productImageSectionTag.removeEventListener('click', productClickHandler);
+    }
+}
+
+function renderChart() {
+
+    const ctx = document.getElementById('canvas').getContext('2d');
+    const chart = new chart(ctx, {
+        type: 'horizontalBar',
+        data: {
+            labels: productNames,
+            datasets: [{
+                label: 'My First dataset',
+                backgroundColor: 'rgb(255, 99, 132)',
+                borderColor: 'rgb(255, 99, 132)',
+                data: [0, 10, 5, 2, 20, 30, 45, 0, 10, 5, 2, 20, 30, 45, 0, 10, 5, 2, 20, 30]
+            }]
+        }
+        // options:{}
+    })
+}
+
+createProducts();
+
+pickNewProduct();
