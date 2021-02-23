@@ -1,0 +1,27 @@
+*{
+    box-sizing: border-box;
+}
+
+header {
+    line-height: .5;
+}
+
+#BusMall {
+    text-align: center;
+    font-size: 45px;
+}
+
+#select {
+    text-align: center;
+    font-size: 30px;
+}
+
+#images {
+    display: flex:
+}
+
+img {
+    max-height: 300px;
+    max-width: 100%;
+    margin: 25px;
+}
