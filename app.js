@@ -9,7 +9,7 @@ const centerProductHeaderTag = document.getElementById('center-product-h2');
 const rightProductHeaderTag = document.getElementById('right-product-h2');
 const productNames = ['Bag', 'Banana', 'Bathroom', 'Boots', 'Breakfast', 'Bubblegum', 'Chair', 'Cthulhu', 'Dog-duck', 'Dragon', 'Pen', 'Pet-sweep', 'Scissors', 'Shark', 'Sweep', 'Tauntaun', 'Unicorn', 'USB', 'Water-can', 'Wine-glass'];
 
-const maxClicks = 5;
+const maxClicks = 25;
 let totalClicks = 0;
 
 const maxRounds = 5;
@@ -53,7 +53,7 @@ function pickNewProduct() {
     const safeProducts = [];
     for (let index = 0; index < Product.all.length; index++) {
         const product = Product.all[index];
-        if (product !== leftProductOnThePage && product !== rightProductOnThePage) {
+        if (product !== leftProductOnThePage && product !== rightProductOnThePage && product !== centerProductOnThePage) {
             safeProducts.push(product);
             if (safeProducts.length === 3) {
                 break;
@@ -61,13 +61,13 @@ function pickNewProduct() {
         }
     }
 
-    leftProductOnThePage = Product.all[0];
-    centerProductOnThePage = Product.all[1];
-    rightProductOnThePage = Product.all[2];
+    leftProductOnThePage = safeProducts[0];
+    centerProductOnThePage = safeProducts[1];
+    rightProductOnThePage = safeProducts[2];
 
-    leftProductOnThePage.displayctr += 1
-    centerProductOnThePage.displayctr += 1
-    rightProductOnThePage.displayctr += 1
+    leftProductOnThePage.timesShown += 1
+    centerProductOnThePage.timesShown += 1
+    rightProductOnThePage.timesShown += 1
 
     renderNewProduct();
 }
