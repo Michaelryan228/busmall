@@ -7,9 +7,14 @@ const rightProductImage = document.getElementById('right-product-img');
 const leftProductHeaderTag = document.getElementById('left-product-h2');
 const centerProductHeaderTag = document.getElementById('center-product-h2');
 const rightProductHeaderTag = document.getElementById('right-product-h2');
+const resultsButton = document.getElementById('button');
+const productNames = ['Bag', 'Banana', 'Bathroom', 'Boots', 'Breakfast', 'Bubblegum', 'Chair', 'Cthulhu', 'Dog-duck', 'Dragon', 'Pen', 'Pet-sweep', 'Scissors', 'Shark', 'Sweep', 'Tauntaun', 'Unicorn', 'USB', 'Water-can', 'Wine-glass'];
 
-const maxClicks = 25;
+const maxClicks = 5;
 let totalClicks = 0;
+
+const maxRounds = 5;
+let roundCtr = 1;
 
 let leftProductOnThePage = null;
 let centerProductOnThePage = null;
@@ -20,32 +25,13 @@ function Product (title, url) {
     this.clicks = 0;
     this.timesShown = 0;
     this.url = url;
+    this.tally = 0;
+    this.views = 0;
 
     Product.all.push(this);
 };
 
 Product.all = [];
-
-new Product('Bag', './images/bag.jpg');
-new Product('Banana', './images/banana.jpg');
-new Product('Bathroom', './images/bathroom.jpg');
-new Product('Boots', './images/boots.jpg');
-new Product('Breakfast', './images/breakfast.jpg');
-new Product('Bubblegum', './images/bubblegum.jpg');
-new Product('Chair', './images/chair.jpg');
-new Product('Cthulhu', './images/cthulhu.jpg');
-new Product('Dog-duck', './images/dog-duck.jpg');
-new Product('Dragon', './images/dragon.jpg');
-new Product('Pen', './images/pen.jpg');
-new Product('Pet-sweep', './images/pet-sweep.jpg');
-new Product('Scissors', './images/scissors.jpg');
-new Product('Shark', './images/shark.jpg');
-new Product('Sweep', './images/sweep.png');
-new Product('Tauntaun', './images/tauntaun.jpg');
-new Product('Unicorn', './images/unicorn.jpg');
-new Product('USB', './images/usb.gif');
-new Product('Water-can', './images/water-can.jpg');
-new Product('Wine-glass', './images/wine-glass.jpg');
 
 function shuffle(array) {
     for (let i = array.length -1; i >= 0; i--) {
@@ -56,16 +42,33 @@ function shuffle(array) {
     }
 }
 
+function createProducts() {
+    for (let index = 0; index < productNames.length; index++) {
+        const productName = productNames [index];
+        new Product(productName, './images/' + productName + '.jpg');
+    }
+}
+
 function pickNewProduct() {
     shuffle(Product.all);
-    console.log(Product.all);
-    leftProductOnThePage = Product.all[0];
-    centerProductOnThePage = Product.all[1];
-    rightProductOnThePage = Product.all[2];
+    const safeProducts = [];
+    for (let index = 0; index < Product.all.length; index++) {
+        const product = Product.all[index];
+        if (product !== leftProductOnThePage && product !== rightProductOnThePage && product !== centerProductOnThePage) {
+            safeProducts.push(product);
+            if (safeProducts.length === 3) {
+                break;
+            }
+        }
+    }
 
-    leftProductOnThePage.displayctr += 1
-    centerProductOnThePage.displayctr += 1
-    rightProductOnThePage.displayctr += 1
+    leftProductOnThePage = safeProducts[0];
+    centerProductOnThePage = safeProducts[1];
+    rightProductOnThePage = safeProducts[2];
+
+    leftProductOnThePage.timesShown += 1
+    centerProductOnThePage.timesShown += 1
+    rightProductOnThePage.timesShown += 1
 
     renderNewProduct();
 }
@@ -102,20 +105,22 @@ function handleClickProduct(event) {
 
         pickNewProduct();
     }
+    totalClicks += 1;
+
+    if (totalClicks === maxClicks) {
+        productImageSectionTag.removeEventListener('click', handleClickProduct);
+    
+        alert('That will do');
+    
+        // renderLikes();
+        // renderChart();
+    }
+    
 }
 
-totalClicks += 1;
-
-if (totalClicks === maxClicks) {
-    productImageSectionTag.removeEventListener('click', handleClickProduct);
-
-    alert('That will do');
-
-    renderLikes();
-}
 
 function renderLikes() {
-    const likesListElem = document.getElementById('product-clicks');
+    const likesListElem = document.getElementById('views');
     likesListElem.innerHTML = '';
     for (let i = 0; i < Product.all.length; i++) {
         const productPicture = Product.all[i];
@@ -125,8 +130,109 @@ function renderLikes() {
     }
 }
 
+function resultsClickHandler(event) {
+    renderLikes();
+    renderChart();
+}
+
 productImageSectionTag.addEventListener('click', handleClickProduct);
+resultsButton.addEventListener('click', resultsClickHandler);
+
+function productClickHandler(event) {
+    const productId = event.target.id;
+
+    switch (productId) {
+        case leftProductImage.id:
+            leftProductOnThePage.tally += 1;
+            pickNewProduct();
+            renderNewProduct();
+            roundCtr += 1;
+            break;
+
+        case centerProductImage.id:
+            centerProductOnThePage.tally += 1;
+            pickNewProduct();
+            renderNewProduct();
+            roundCtr += 1;
+
+        case rightProductImage.id:
+            rightProductOnThePage.tally += 1;
+            pickNewProduct();
+            renderNewProduct();
+            roundCtr += 1;
+
+        default:
+            alert('Mind the gap!');
+    }
+
+    if (roundCtr === maxRounds) {
+        productImageSectionTag.removeEventListener('click', productClickHandler);
+        displayResultsButton();
+        const resultButton = document.getElementById('result-button');
+        resultButton.addEventListener('click', renderResults);
+        renderChart();
+    }
+}
+
+function displayResultsButton() {
+    const results = document.getElementById('results');
+    const button = document.createElement('button');
+    button.setAttribute('id', 'result-button');
+    results.appendChild(button);
+    button.textContent = 'View Results';
+}
+
+function renderResults() {
+    const resultButton = document.getElementById('result-button');
+    resultButton.remove();
+    const results = document.getElementById('results');
+    const resultHeader = document.createElement('h2');
+    resultsHeader.textContent = 'Results';
+    results.appendChild(resultHeader);
+    const resultsListElem = document.createElement('ul');
+    results.appendChild(resultsList);
+    for (let i = 0; i < Product.all.length; i++) {
+        const resultsListItem = document.createElement('li');
+        resultsListItem.textContent = Product.all[i].name + 'had' + Product.all[i].clicks + ' votes, and was seen ' + Product.all[i].timesShown + ' times ';
+        resultsListElem.appendChild(resultsListItem)
+    }
+}
+
+
+function renderChart() {
+
+
+    const votes = [];
+    const chartCount = [];
+    for (let i = 0; i < Product.all.length; i++) {
+        const voteCount = Product.all[i].clicks;
+        const timesVoted = Product.all[i].timesShown;
+        votes.push(voteCount);
+        chartCount.push(timesVoted);
+    }
+
+    const ctx = document.getElementById('canvas').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'horizontalBar',
+        data: {
+            labels: productNames,
+            datasets: [{
+                label: 'Votes',
+                backgroundColor: 'rgb(255, 99, 132)',
+                borderColor: 'rgb(255, 99, 132)',
+                data: votes
+            },
+            {
+                label: 'Times Shown',
+                backgroundColor: 'rgb(255, 99, 132)',
+                borderColor: 'rgb(255, 99, 132)',
+                data: chartCount
+            }]
+        },
+        options: {}
+    });
+}
+
+createProducts();
 
 pickNewProduct();
-
-renderLikes();
