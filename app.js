@@ -7,9 +7,10 @@ const rightProductImage = document.getElementById('right-product-img');
 const leftProductHeaderTag = document.getElementById('left-product-h2');
 const centerProductHeaderTag = document.getElementById('center-product-h2');
 const rightProductHeaderTag = document.getElementById('right-product-h2');
+const resultsButton = document.getElementById('button');
 const productNames = ['Bag', 'Banana', 'Bathroom', 'Boots', 'Breakfast', 'Bubblegum', 'Chair', 'Cthulhu', 'Dog-duck', 'Dragon', 'Pen', 'Pet-sweep', 'Scissors', 'Shark', 'Sweep', 'Tauntaun', 'Unicorn', 'USB', 'Water-can', 'Wine-glass'];
 
-const maxClicks = 25;
+const maxClicks = 5;
 let totalClicks = 0;
 
 const maxRounds = 5;
@@ -111,14 +112,15 @@ function handleClickProduct(event) {
     
         alert('That will do');
     
-        renderLikes();
+        // renderLikes();
+        // renderChart();
     }
     
 }
 
 
 function renderLikes() {
-    const likesListElem = document.getElementById('product-clicks');
+    const likesListElem = document.getElementById('views');
     likesListElem.innerHTML = '';
     for (let i = 0; i < Product.all.length; i++) {
         const productPicture = Product.all[i];
@@ -128,7 +130,13 @@ function renderLikes() {
     }
 }
 
+function resultsClickHandler(event) {
+    renderLikes();
+    renderChart();
+}
+
 productImageSectionTag.addEventListener('click', handleClickProduct);
+resultsButton.addEventListener('click', resultsClickHandler);
 
 function productClickHandler(event) {
     const productId = event.target.id;
@@ -159,25 +167,70 @@ function productClickHandler(event) {
 
     if (roundCtr === maxRounds) {
         productImageSectionTag.removeEventListener('click', productClickHandler);
+        displayResultsButton();
+        const resultButton = document.getElementById('result-button');
+        resultButton.addEventListener('click', renderResults);
+        renderChart();
     }
 }
 
+function displayResultsButton() {
+    const results = document.getElementById('results');
+    const button = document.createElement('button');
+    button.setAttribute('id', 'result-button');
+    results.appendChild(button);
+    button.textContent = 'View Results';
+}
+
+function renderResults() {
+    const resultButton = document.getElementById('result-button');
+    resultButton.remove();
+    const results = document.getElementById('results');
+    const resultHeader = document.createElement('h2');
+    resultsHeader.textContent = 'Results';
+    results.appendChild(resultHeader);
+    const resultsListElem = document.createElement('ul');
+    results.appendChild(resultsList);
+    for (let i = 0; i < Product.all.length; i++) {
+        const resultsListItem = document.createElement('li');
+        resultsListItem.textContent = Product.all[i].name + 'had' + Product.all[i].clicks + ' votes, and was seen ' + Product.all[i].timesShown + ' times ';
+        resultsListElem.appendChild(resultsListItem)
+    }
+}
+
+
 function renderChart() {
 
+
+    const votes = [];
+    const chartCount = [];
+    for (let i = 0; i < Product.all.length; i++) {
+        const voteCount = Product.all[i].clicks;
+        const timesVoted = Product.all[i].timesShown;
+        votes.push(voteCount);
+        chartCount.push(timesVoted);
+    }
+
     const ctx = document.getElementById('canvas').getContext('2d');
-    const chart = new chart(ctx, {
+    const chart = new Chart(ctx, {
         type: 'horizontalBar',
         data: {
             labels: productNames,
             datasets: [{
-                label: 'My First dataset',
+                label: 'Votes',
                 backgroundColor: 'rgb(255, 99, 132)',
                 borderColor: 'rgb(255, 99, 132)',
-                data: [0, 10, 5, 2, 20, 30, 45, 0, 10, 5, 2, 20, 30, 45, 0, 10, 5, 2, 20, 30]
+                data: votes
+            },
+            {
+                label: 'Times Shown',
+                backgroundColor: 'rgb(255, 99, 132)',
+                borderColor: 'rgb(255, 99, 132)',
+                data: chartCount
             }]
-        }
-        // options:{}
-    })
+        },
+        options: {}
+    });
 }
 
 createProducts();
