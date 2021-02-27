@@ -10,10 +10,10 @@ const rightProductHeaderTag = document.getElementById('right-product-h2');
 const resultsButton = document.getElementById('button');
 const productNames = ['Bag', 'Banana', 'Bathroom', 'Boots', 'Breakfast', 'Bubblegum', 'Chair', 'Cthulhu', 'Dog-duck', 'Dragon', 'Pen', 'Pet-sweep', 'Scissors', 'Shark', 'Sweep', 'Tauntaun', 'Unicorn', 'USB', 'Water-can', 'Wine-glass'];
 
-const maxClicks = 5;
+const maxClicks = 25;
 let totalClicks = 0;
 
-const maxRounds = 5;
+const maxRounds = 25;
 let roundCtr = 1;
 
 let leftProductOnThePage = null;
